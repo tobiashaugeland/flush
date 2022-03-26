@@ -19,6 +19,8 @@ int make_dir(const char *pathname, mode_t mode)
 
 int main()
 {
+    // print current directory
+    printf("Current directory: %s\n", getcwd(NULL, 0));
     char buf[1024];
     fgets(buf, sizeof(buf), stdin);
     make_dir(buf,0777);
