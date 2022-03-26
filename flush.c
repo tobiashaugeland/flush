@@ -10,7 +10,6 @@
 
 int change_directory(const char *pathname)
 {
-    printf("%s\n", pathname);
     int ret;
     ret = chdir(pathname);
     if (ret == -1)
@@ -39,7 +38,7 @@ int main()
     {
         // print current directory
         printf("%s: ", getcwd(NULL, 0));
-        char buf[1024];
+        char buf[PATH_MAX];
         fgets(buf, sizeof(buf), stdin);
 
         if (strcmp(buf, "exit\n") == 0)
@@ -51,12 +50,9 @@ int main()
         cd_command[2] = '\0';
         if(strcmp(cd_command, "cd") == 0)
         {
-            char garbage[1024];
-            char pathname[1024];
+            char garbage[PATH_MAX];
+            char pathname[PATH_MAX];
             sscanf(buf, "%s %s", garbage, pathname);
-            // strcat("\n", pathname);
-            printf("%x\n", *pathname);
-            printf("%x\n", "test");
             change_directory(pathname);
         }
         else
