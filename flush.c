@@ -4,7 +4,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdlib.h>
-
+#include <linux/limits.h>
 
 
 int change_directory(const char *pathname)
@@ -37,7 +37,7 @@ int main()
     while(1) {
     // print current directory
     printf("%s: ", getcwd(NULL, 0));
-    char buf[1024];
+    char buf[PATH_MAX];
     fgets(buf, sizeof(buf), stdin);
     // change directory
     execute_command(buf);
