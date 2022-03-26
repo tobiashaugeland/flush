@@ -3,19 +3,9 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
 
 
-int make_dir(const char *pathname, mode_t mode)
-{
-    int ret;
-    ret = mkdir(pathname, mode);
-    if (ret == -1)
-    {
-        perror("could not make directory");
-        return -1;
-    }
-    return 0;
-}
 
 int change_directory(const char *pathname)
 {
@@ -29,13 +19,27 @@ int change_directory(const char *pathname)
     return 0;
 }
 
+int execute_command(const char *command)
+{
+    int ret;
+    ret = system(command);
+    if (ret == -1)
+    {
+        perror("could not execute command");
+        return -1;
+    }
+    return 0;
+}
+
+
 int main()
 {
+    while(1) {
     // print current directory
-    printf("Current directory: %s\n", getcwd(NULL, 0));
+    printf("%s: ", getcwd(NULL, 0));
     char buf[1024];
     fgets(buf, sizeof(buf), stdin);
     // change directory
-    change_directory(buf);
-    printf("Current directory: %s\n", getcwd(NULL, 0));
+    execute_command(buf);
+    }
 }
