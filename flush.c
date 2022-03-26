@@ -17,11 +17,25 @@ int make_dir(const char *pathname, mode_t mode)
     return 0;
 }
 
+int change_directory(const char *pathname)
+{
+    int ret;
+    ret = chdir(pathname);
+    if (ret == -1)
+    {
+        perror("could not change directory");
+        return -1;
+    }
+    return 0;
+}
+
 int main()
 {
     // print current directory
     printf("Current directory: %s\n", getcwd(NULL, 0));
     char buf[1024];
     fgets(buf, sizeof(buf), stdin);
-    make_dir(buf,0777);
+    // change directory
+    change_directory(buf);
+    printf("Current directory: %s\n", getcwd(NULL, 0));
 }
