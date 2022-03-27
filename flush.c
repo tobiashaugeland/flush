@@ -33,7 +33,7 @@ int execute_command(const char *command)
     return 0;
 }
 
-int parse_input(char *input, char **dest)
+char** parse_input(char *input)
 {
     char **parsed_array = NULL;
     char *token = strtok(input, " \t");
@@ -49,39 +49,41 @@ int parse_input(char *input, char **dest)
     parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
     parsed_array[length] = NULL;
 
-    dest = parsed_array;
 
-    free(parsed_array);
-
-    return 0;
+    return parsed_array;
 }
 
 int execute_task(char **input)
 {
-    char **arg_list = NULL;
+    char *arglist[PATH_MAX];
+    strncpy(arglist, input, PATH_MAX - 1);
+    // strcpy(arg_list[0], input[0]);
     int index = 0;
     int written_bytes = 0;
-    while(input[index])
-    {
-        if (strcmp(arg_list[index], "<"))
-        {
-            break;
-        }
+    // printf("%s\n", temp[0]);
+    // while(input[index])
+    // {
+    //     // if (strcmp(arg_list[index], "<"))
+    //     // {
+    //     //     break;
+    //     // }
 
-        else if (strcmp(arg_list[index], ">"))
-        {
-            break;
-        }
-        arg_list = realloc(arg_list, sizeof(*input[index]));
-        index++;
-    }
-    execvp(arg_list[0], arg_list);
+    //     // else if (strcmp(arg_list[index], ">"))
+    //     // {
+    //     //     break;
+    //     // }
+    //     // arg_list = realloc(arg_list, strlen(input[index]+1));
+    //     // index++;
+    //     break;
+    // }
+    // printf("%s\n", input);
+    // execvp(arg_list[0], arg_list);
+    printf("Made it here\n");
     return 0;
 }
 
 int main()
 {
-    char **parsed_array = NULL;
     while (1)
     {
         // print current directory
@@ -93,22 +95,24 @@ int main()
         {
             exit(0);
         }
-        parse_input(buf, parsed_array);
-        execute_task(parsed_array);
-        pid_t kek = fork();
-        if (kek == 0)
-        {
-            exit(0);
-        }
-        else
-        {
-            int status;
-            waitpid(kek, &status, 0);
-            if (WIFEXITED(status))
-            {
-                printf("Exit status = %d\n", WEXITSTATUS(status));
-            }
-        }
+        char **parsed_array = parse_input(buf);
+        // printf("%s\n", parsed_array[0]);
+        // execute_task(parsed_array);
+        free(parsed_array);
+        // pid_t kek = fork();
+        // if (kek == 0)
+        // {
+        //     exit(0);
+        // }
+        // else
+        // {
+        //     int status;
+        //     waitpid(kek, &status, 0);
+        //     if (WIFEXITED(status))
+        //     {
+        //         printf("Exit status = %d\n", WEXITSTATUS(status));
+        //     }
+        // }
         fflush(NULL);
     }
 }
