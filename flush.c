@@ -6,7 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <linux/limits.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 
 int change_directory(const char *pathname)
 {
@@ -32,10 +33,10 @@ int execute_command(const char *command)
     return 0;
 }
 
-int parse_input(char * input)
+int parse_input(char *input)
 {
     char *token;
-    char * parsed_array[2048];
+    char *parsed_array[16];
 
     int i = 0;
     token = strtok(input, " ");
@@ -66,7 +67,7 @@ int main()
             exit(0);
         }
         int kek = fork();
-        if(kek == 0)
+        if (kek == 0)
         {
             parse_input(buf);
         }
@@ -74,18 +75,18 @@ int main()
         {
             wait(NULL);
         }
-//         char cd_command[3] = {0};
-//         strncpy(cd_command, buf, 2);
-//         if(strcmp(cd_command, "cd") == 0)
-//         {
-//             char garbage[PATH_MAX];
-//             char pathname[PATH_MAX];
-//             sscanf(buf, "%s %s", garbage, pathname);
-//             change_directory(pathname);
-//         }
-//         else
-//         {
-//             execute_command(buf);
-//         }
+        //         char cd_command[3] = {0};
+        //         strncpy(cd_command, buf, 2);
+        //         if(strcmp(cd_command, "cd") == 0)
+        //         {
+        //             char garbage[PATH_MAX];
+        //             char pathname[PATH_MAX];
+        //             sscanf(buf, "%s %s", garbage, pathname);
+        //             change_directory(pathname);
+        //         }
+        //         else
+        //         {
+        //             execute_command(buf);
+        //         }
     }
 }
