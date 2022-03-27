@@ -18,8 +18,9 @@ typedef struct
 
 process_data pids[MAX_BACKGROUND_PROCESSES];
 
-int change_directory(const char *pathname)
+int change_directory(char *pathname)
 {
+    pathname[strcspn(pathname, "\n")] = 0;
     int ret;
     ret = chdir(pathname);
     if (ret == -1)
@@ -30,17 +31,6 @@ int change_directory(const char *pathname)
     return 0;
 }
 
-int execute_command(const char *command)
-{
-    int ret;
-    ret = system(command);
-    if (ret == -1)
-    {
-        perror("could not execute command");
-        return -1;
-    }
-    return 0;
-}
 
 char **parse_input(char *input)
 {
@@ -149,6 +139,12 @@ int main()
         else if (strcmp(internal_command, "jobs") == 0)
         {
             print_active_processes();
+            continue;
+        }
+
+        else if(strstr(internal_command, "cd") != NULL)
+        {
+            change_directory(buf + 3);
             continue;
         }
 
