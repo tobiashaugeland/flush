@@ -35,16 +35,15 @@ int execute_command(const char *command)
 
 int parse_input(char *input)
 {
-    char *token;
     char **parsed_array = NULL;
-    token = strtok(input, " ");
+    char *token = strtok(input, " ");
 
     int length = 0, i;
     while (token)
     {
-        parsed_array = realloc(parsed_array, sizeof(char *) * (length++));
+        parsed_array = realloc(parsed_array, sizeof(char *) * (++length));
         token[strcspn(token, "\r\n")] = 0;
-        parsed_array[length-1] = token;
+        parsed_array[length - 1] = token;
         token = strtok(NULL, " ");
     }
     parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
@@ -84,18 +83,5 @@ int main()
                 printf("Exit status = %d\n", WEXITSTATUS(status));
             }
         }
-        //         char cd_command[3] = {0};
-        //         strncpy(cd_command, buf, 2);
-        //         if(strcmp(cd_command, "cd") == 0)
-        //         {
-        //             char garbage[PATH_MAX];
-        //             char pathname[PATH_MAX];
-        //             sscanf(buf, "%s %s", garbage, pathname);
-        //             change_directory(pathname);
-        //         }
-        //         else
-        //         {
-        //             execute_command(buf);
-        //         }
     }
 }
