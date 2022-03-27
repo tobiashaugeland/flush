@@ -33,7 +33,7 @@ int execute_command(const char *command)
     return 0;
 }
 
-char** parse_input(char *input)
+char **parse_input(char *input)
 {
     char **parsed_array = NULL;
     char *token = strtok(input, " \t");
@@ -54,27 +54,30 @@ char** parse_input(char *input)
 
 int execute_task(char **input)
 {
-    char **arg_list;
+    char **arg_list = NULL;
     int index = 0;
-    int written_bytes = 0;
-    while(*input++) //TODO
+    while (*input)
     {
-        if (strcmp(arg_list[index], "<"))
+        if (strcmp(*input, "<") == 0)
         {
-            break;
+            FILE *fp = fopen(*(++input), "r");
+            dup2(fileno(fp), STDIN_FILENO);
         }
 
-        else if (strcmp(arg_list[index], ">"))
+        else if (strcmp(*input, ">") == 0)
         {
-            break;
+            FILE *fp = fopen(*(++input), "w");
+            dup2(fileno(fp), 1);
         }
-        arg_list = realloc(arg_list, strlen(input[index]+1));
-        index++;
-        break;
+        else
+        {
+            arg_list = realloc(arg_list, strlen(*input) + 1);
+            arg_list[index] = *input;
+            index++;
+        }
+        *input++;
     }
-    // printf("%s\n", input);
-    // execvp(arg_list[0], arg_list);
-    printf("Made it here\n");
+    execvp(arg_list[0], arg_list);
     return 0;
 }
 
@@ -92,8 +95,7 @@ int main()
             exit(0);
         }
         char **parsed_array = parse_input(buf);
-
-        // execute_task(parsed_array);
+        execute_task(parsed_array);
         // pid_t kek = fork();
         // if (kek == 0)
         // {
