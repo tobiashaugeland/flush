@@ -38,7 +38,7 @@ int parse_input(char *input)
     char **parsed_array = NULL;
     char *token = strtok(input, " ");
 
-    int length = 0, i;
+    int length = 0;
     while (token)
     {
         parsed_array = realloc(parsed_array, sizeof(char *) * (++length));
@@ -83,5 +83,6 @@ int main()
                 printf("Exit status = %d\n", WEXITSTATUS(status));
             }
         }
+        fflush(stdout);
     }
 }
