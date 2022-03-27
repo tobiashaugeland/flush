@@ -34,29 +34,21 @@ int execute_command(const char *command)
 
 int parse_input(char * input)
 {
-    char parsed[32][128];
-    int arr_counter = 0;
-    int str_counter = 0;
-    for (int i = 0; i < strlen(input); i++)
-    {
-        char c = input[i];
-        if (c == 0x20 || c == 0x09)
-        {
-            parsed[arr_counter][str_counter] = '\0';
-            arr_counter ++;
-            str_counter = 0;
-        }
-        else{
-            parsed[arr_counter][str_counter] = c;
-            str_counter ++;
-        }
-    }
-    execvp(parsed[0], parsed);
+    char *token;
+    char * parsed_array[2048];
 
-//     for (int i = 0; i < 4; i++)
-//     {
-//         printf("%s ", parsed[i]);
-//     }
+    int i = 0;
+    token = strtok(input, " ");
+    while (token != NULL)
+    {
+        parsed_array[i] = token;
+        token = strtok(NULL, " ");
+        i++;
+    }
+    parsed_array[i] = NULL;
+
+    execvp(parsed_array[0], parsed_array);
+
     return 0;
 }
 
@@ -73,7 +65,15 @@ int main()
         {
             exit(0);
         }
-        parse_input(buf);
+        int kek = fork();
+        if(kek == 0)
+        {
+            parse_input(buf);
+        }
+        else
+        {
+            wait(NULL);
+        }
 //         char cd_command[3] = {0};
 //         strncpy(cd_command, buf, 2);
 //         if(strcmp(cd_command, "cd") == 0)
