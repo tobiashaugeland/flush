@@ -67,14 +67,19 @@ int main()
         {
             exit(0);
         }
-        int kek = fork();
+        pid_t kek = fork();
         if (kek == 0)
         {
             parse_input(buf);
         }
         else
         {
-            wait(NULL);
+            int status;
+            waitpid(kek, &status, 0);
+            if (WIFEXITED(status))
+            {
+                printf("Exit status = %d\n", WEXITSTATUS(status));
+            }
         }
         //         char cd_command[3] = {0};
         //         strncpy(cd_command, buf, 2);
