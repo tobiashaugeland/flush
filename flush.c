@@ -42,6 +42,7 @@ int parse_input(char *input)
     token = strtok(input, " ");
     while (token != NULL)
     {
+        token[strcspn(token, "\r\n")] = 0;
         parsed_array[i] = token;
         token = strtok(NULL, " ");
         i++;
