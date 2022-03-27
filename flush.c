@@ -36,20 +36,23 @@ int execute_command(const char *command)
 int parse_input(char *input)
 {
     char *token;
-    char *parsed_array[16];
-
-    int i = 0;
+    char **parsed_array = NULL;
     token = strtok(input, " ");
-    while (token != NULL)
+
+    int length = 0, i;
+    while (token)
     {
+        parsed_array = realloc(parsed_array, sizeof(char *) * (length++));
         token[strcspn(token, "\r\n")] = 0;
-        parsed_array[i] = token;
+        parsed_array[length-1] = token;
         token = strtok(NULL, " ");
-        i++;
     }
-    parsed_array[i] = NULL;
+    parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
+    parsed_array[length] = NULL;
 
     execvp(parsed_array[0], parsed_array);
+
+    free(parsed_array);
 
     return 0;
 }
