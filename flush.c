@@ -9,6 +9,12 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+typedef struct
+{
+    pid_t pid;
+    char command[128];
+}process_data;
+
 int change_directory(const char *pathname)
 {
     int ret;
@@ -83,33 +89,68 @@ int execute_task(char **input)
 
 int main()
 {
+    process_data pids[16];
+    int pid_index = 0;
     while (1)
     {
+        char buf[PATH_MAX];
         // print current directory
         printf("%s: ", getcwd(NULL, 0));
-        char buf[PATH_MAX];
-        fgets(buf, sizeof(buf), stdin);
 
-        if (strcmp(buf, "exit\n") == 0)
+        // ctrl + d makes fgets return NULL
+        if (fgets(buf, sizeof(buf), stdin) == NULL)
+        {
+            printf("\n");
+            exit(0);
+        }
+
+        // remove all data in input after &
+        char * res = strstr(buf, "&");
+        if (res)
+        {
+            memset(res, 0, strlen(res));
+        }
+
+        char internal_command[5] = {0};
+        strncpy(internal_command, buf, 4);
+
+        if (strcmp(internal_command, "exit") == 0)
         {
             exit(0);
         }
+
+
+        else if(strcmp(internal_command, "jobs"))
+        {
+            exit(0);
+        }
+
+
+
         char **parsed_array = parse_input(buf);
-        execute_task(parsed_array);
-        // pid_t kek = fork();
-        // if (kek == 0)
-        // {
-        //     exit(0);
-        // }
-        // else
-        // {
-        //     int status;
-        //     waitpid(kek, &status, 0);
-        //     if (WIFEXITED(status))
-        //     {
-        //         printf("Exit status = %d\n", WEXITSTATUS(status));
-        //     }
-        // }
+        //execute_task(parsed_array);
+        pid_t child_pid = fork();
+        if (child_pid == 0)
+        {
+            execute_task(parsed_array);
+            exit(0);
+        }
+        else
+        {
+            if (res)
+            {
+                process_data data;
+                data.pid = child_pid;
+                strcpy(data.command, buf);
+                pids[pid_index % 16] = data;
+            }
+            int status;
+            waitpid(child_pid, &status, 0);
+            if (WIFEXITED(status))
+            {
+                printf("Exit status = %d\n", WEXITSTATUS(status));
+            }
+        }
         fflush(NULL);
     }
 }
