@@ -49,33 +49,29 @@ char** parse_input(char *input)
     parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
     parsed_array[length] = NULL;
 
-
     return parsed_array;
 }
 
 int execute_task(char **input)
 {
-    char *arglist[PATH_MAX];
-    strncpy(arglist, input, PATH_MAX - 1);
-    // strcpy(arg_list[0], input[0]);
+    char **arg_list;
     int index = 0;
     int written_bytes = 0;
-    // printf("%s\n", temp[0]);
-    // while(input[index])
-    // {
-    //     // if (strcmp(arg_list[index], "<"))
-    //     // {
-    //     //     break;
-    //     // }
+    while(*input++) //TODO
+    {
+        if (strcmp(arg_list[index], "<"))
+        {
+            break;
+        }
 
-    //     // else if (strcmp(arg_list[index], ">"))
-    //     // {
-    //     //     break;
-    //     // }
-    //     // arg_list = realloc(arg_list, strlen(input[index]+1));
-    //     // index++;
-    //     break;
-    // }
+        else if (strcmp(arg_list[index], ">"))
+        {
+            break;
+        }
+        arg_list = realloc(arg_list, strlen(input[index]+1));
+        index++;
+        break;
+    }
     // printf("%s\n", input);
     // execvp(arg_list[0], arg_list);
     printf("Made it here\n");
@@ -96,9 +92,8 @@ int main()
             exit(0);
         }
         char **parsed_array = parse_input(buf);
-        // printf("%s\n", parsed_array[0]);
+
         // execute_task(parsed_array);
-        free(parsed_array);
         // pid_t kek = fork();
         // if (kek == 0)
         // {
