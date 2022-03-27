@@ -33,10 +33,10 @@ int execute_command(const char *command)
     return 0;
 }
 
-int parse_input(char *input)
+int parse_input(char *input, char **dest)
 {
     char **parsed_array = NULL;
-    char *token = strtok(input, " ");
+    char *token = strtok(input, " \t");
 
     int length = 0;
     while (token)
@@ -49,15 +49,22 @@ int parse_input(char *input)
     parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
     parsed_array[length] = NULL;
 
-    execvp(parsed_array[0], parsed_array);
+    dest = parsed_array;
 
     free(parsed_array);
 
     return 0;
 }
 
+int execute_task(char **input)
+{
+    
+    return 0;
+}
+
 int main()
 {
+    char **parsed_array = NULL;
     while (1)
     {
         // print current directory
@@ -69,10 +76,11 @@ int main()
         {
             exit(0);
         }
+        parse_input(buf, parsed_array);
         pid_t kek = fork();
         if (kek == 0)
         {
-            parse_input(buf);
+            exit(0);
         }
         else
         {
@@ -83,6 +91,6 @@ int main()
                 printf("Exit status = %d\n", WEXITSTATUS(status));
             }
         }
-        fflush(stdout);
+        fflush(NULL);
     }
 }
