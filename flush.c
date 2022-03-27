@@ -58,7 +58,24 @@ int parse_input(char *input, char **dest)
 
 int execute_task(char **input)
 {
-    
+    char **arg_list = NULL;
+    int index = 0;
+    int written_bytes = 0;
+    while(input[index])
+    {
+        if (strcmp(arg_list[index], "<"))
+        {
+            break;
+        }
+
+        else if (strcmp(arg_list[index], ">"))
+        {
+            break;
+        }
+        arg_list = realloc(arg_list, sizeof(*input[index]));
+        index++;
+    }
+    execvp(arg_list[0], arg_list);
     return 0;
 }
 
@@ -77,6 +94,7 @@ int main()
             exit(0);
         }
         parse_input(buf, parsed_array);
+        execute_task(parsed_array);
         pid_t kek = fork();
         if (kek == 0)
         {
