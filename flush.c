@@ -9,11 +9,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define MAX_BACKGROUND_PROCESSES 10
 typedef struct
 {
     pid_t pid;
     char command[128];
-}process_data;
+} process_data;
+
+process_data pids[MAX_BACKGROUND_PROCESSES];
 
 int change_directory(const char *pathname)
 {
@@ -58,7 +61,7 @@ char **parse_input(char *input)
     return parsed_array;
 }
 
-int execute_task(char **input)
+void execute_task(char **input)
 {
     char **arg_list = NULL;
     int index = 0;
@@ -84,12 +87,34 @@ int execute_task(char **input)
         *input++;
     }
     execvp(arg_list[0], arg_list);
-    return 0;
+}
+
+void kill_all_inactive_processes()
+{
+    int i;
+    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    {
+        if (pids[i].pid != 0 && !waitpid(pids[i].pid, NULL, WNOHANG) == 0)
+        {
+            memset(&pids[i], 0, sizeof(pids[i]));
+        }
+    }
+}
+
+void print_active_processes()
+{
+    int i;
+    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    {
+        if (pids[i].pid != 0)
+        {
+            printf("[%d] %s\n", pids[i].pid, pids[i].command);
+        }
+    }
 }
 
 int main()
 {
-    process_data pids[16];
     int pid_index = 0;
     while (1)
     {
@@ -104,8 +129,10 @@ int main()
             exit(0);
         }
 
+        kill_all_inactive_processes();
+
         // remove all data in input after &
-        char * res = strstr(buf, "&");
+        char *res = strstr(buf, "&");
         if (res)
         {
             memset(res, 0, strlen(res));
@@ -119,21 +146,18 @@ int main()
             exit(0);
         }
 
-
-        else if(strcmp(internal_command, "jobs"))
+        else if (strcmp(internal_command, "jobs") == 0)
         {
-            exit(0);
+            print_active_processes();
+            continue;
         }
 
-
-
         char **parsed_array = parse_input(buf);
-        //execute_task(parsed_array);
+        // execute_task(parsed_array);
         pid_t child_pid = fork();
         if (child_pid == 0)
         {
             execute_task(parsed_array);
-            exit(0);
         }
         else
         {
@@ -142,13 +166,16 @@ int main()
                 process_data data;
                 data.pid = child_pid;
                 strcpy(data.command, buf);
-                pids[pid_index % 16] = data;
+                pids[pid_index++ % 16] = data;
             }
-            int status;
-            waitpid(child_pid, &status, 0);
-            if (WIFEXITED(status))
+            else
             {
-                printf("Exit status = %d\n", WEXITSTATUS(status));
+                int status;
+                waitpid(child_pid, &status, 0);
+                if (WIFEXITED(status))
+                {
+                    printf("Exit status = %d\n", WEXITSTATUS(status));
+                }
             }
         }
         fflush(NULL);
