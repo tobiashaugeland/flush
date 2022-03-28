@@ -91,9 +91,7 @@ int pipe_task(int in, int out, command_list *command_list)
 
 void execute_task(int n, command_list *input_list)
 {
-    int i;
-    pid_t pid;
-    int in, fd[2];
+    int i, in, fd[2], index;
     in = 0;
 
     for (i = 0; i < n - 1; i++)
@@ -106,7 +104,7 @@ void execute_task(int n, command_list *input_list)
 
     char **arg_list = NULL;
     char **input = (input_list + i)->argv;
-    int index = 0;
+    index = 0;
     while (*input)
     {
         if (strcmp(*input, "<") == 0)
