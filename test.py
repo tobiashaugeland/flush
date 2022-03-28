@@ -8,7 +8,8 @@ import pgrep
 parser = argparse.ArgumentParser(description='Test the program')
 
 parser.add_argument('-f', '--file', help='The file to test', default='flush')
-parser.add_argument('-e', '--extended', help='Run extended tests', action='store_true')
+parser.add_argument('-e', '--extended',
+                    help='Run extended tests', action='store_true')
 
 args = parser.parse_args()
 file = args.file
@@ -65,6 +66,7 @@ def test_four():
     assert cat_command == 'heisann', 'The output is not correct, should been heisann, was: ' + cat_command
     print('Test four passed')
 
+
 def test_five():
     execute_command('head -1 < testfile > testfile2')
     local_file = open('testfile2', 'r')
@@ -73,11 +75,13 @@ def test_five():
     os.remove('testfile2')
     print('Test five passed')
 
+
 def test_six():
     process.stdin.write('sleep 5 & \n')
     sleep = pgrep.pgrep('sleep')
     assert len(sleep) >= 1, 'The sleep process is not found'
     print('Test six passed')
+
 
 def test_seven():
     local_file = open('testfile', 'w')
@@ -91,6 +95,7 @@ def test_seven():
     print('Test seven passed')
     os.remove('testfile')
     os.remove('testfile2')
+
 
 test_one()
 process = restart_process(process)
