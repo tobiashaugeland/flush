@@ -23,6 +23,11 @@ typedef struct
 
 process_data pids[MAX_BACKGROUND_PROCESSES];
 
+/**
+ * @brief Changes current working directory to the given path
+ *
+ * @return 0 on success, -1 on failure
+ */
 int change_directory(char *pathname)
 {
     pathname[strcspn(pathname, "\n")] = 0;
@@ -35,6 +40,12 @@ int change_directory(char *pathname)
     return 0;
 }
 
+/**
+ * @brief Splits char* into char**
+ *
+ * @param input String to be split
+ * @return char**
+ */
 char **smaller_parsing(char *input)
 {
     char **argv = NULL;
@@ -52,6 +63,13 @@ char **smaller_parsing(char *input)
     return argv;
 }
 
+/**
+ * @brief Parses the input string and puts the commands into a command_list struct
+ * seperated by pipes.
+ *
+ * @param input The input string
+ * @return A command_list struct where the commands are to be stored
+ */
 void parse_input(char *input, command_list *command_list)
 {
     char *input_copy = strdup(input);
@@ -92,13 +110,15 @@ int pipe_task(int in, int out, command_list *command_list)
 void execute_task(int n, command_list *input_list)
 {
     int i, in, fd[2], index;
+    pid_t pid;
     in = 0;
 
     for (i = 0; i < n - 1; i++)
     {
         pipe(fd);
-        pipe_task(in, fd[1], input_list + i);
+        pid = pipe_task(in, fd[1], input_list + i);
         close(fd[1]);
+        wait(NULL);
         in = fd[0];
     }
 
@@ -202,6 +222,7 @@ int main()
             continue;
         }
 
+        //Please don't pipe more than 16 commands, okay? Thank you, bye.
         command_list parsed_array[16] = {0};
         parse_input(buf, parsed_array);
 
