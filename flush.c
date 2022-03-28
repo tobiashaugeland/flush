@@ -101,7 +101,25 @@ int pipe_task(int in, int out, command_list *command_list)
             close(out);
         }
 
-        return execvp(command_list->argv[0], command_list->argv);
+        char **argv = NULL;
+        int index = 0;
+
+        while (*command_list->argv)
+        {
+            if (strcmp(*command_list->argv, "<") == 0)
+            {
+                FILE *fp = fopen(*(++command_list->argv), "r");
+                dup2(fileno(fp), 0);
+            }
+            else
+            {
+                argv = realloc(argv, sizeof(char *) * (++index));
+                argv[index - 1] = *command_list->argv;
+            }
+            command_list->argv++;
+        }
+
+        return execvp(argv[0], argv);
     }
 
     return pid;
@@ -222,7 +240,7 @@ int main()
             continue;
         }
 
-        //Please don't pipe more than 16 commands, okay? Thank you, bye.
+        // Please don't pipe more than 16 commands, okay? Thank you, bye.
         command_list parsed_array[16] = {0};
         parse_input(buf, parsed_array);
 
