@@ -8,9 +8,11 @@ import pgrep
 parser = argparse.ArgumentParser(description='Test the program')
 
 parser.add_argument('-f', '--file', help='The file to test', default='flush')
+parser.add_argument('-e', '--extended', help='Run extended tests', action='store_true')
 
 args = parser.parse_args()
 file = args.file
+extended = args.extended
 
 
 if not os.path.exists('testfolder'):
@@ -72,15 +74,23 @@ def test_five():
     print('Test five passed')
 
 def test_six():
-    process.stdin.write('sleep 2 & \n')
+    process.stdin.write('sleep 5 & \n')
     sleep = pgrep.pgrep('sleep')
-    for num in sleep:
-        print('sleep: ' + str(num))
     assert len(sleep) >= 1, 'The sleep process is not found'
-    jobs = execute_command('jobs')
-    print('jobs: '+jobs)
-    assert jobs.find('sleep') != -1, 'The jobs command is not correct'
+    print('Test six passed')
 
+def test_seven():
+    local_file = open('testfile', 'w')
+    local_file.write('line one\n')
+    local_file.write('line two\n')
+    local_file.close()
+
+    execute_command('cat testfile | head -1 | cat > testfile2')
+    local_file = open('testfile2', 'r')
+    assert local_file.readline().strip() == 'line one', 'The file is not correct'
+    print('Test seven passed')
+    os.remove('testfile')
+    os.remove('testfile2')
 
 test_one()
 process = restart_process(process)
@@ -93,6 +103,9 @@ process = restart_process(process)
 test_five()
 process = restart_process(process)
 test_six()
+if extended:
+    process = restart_process(process)
+    test_seven()
 
 os.removedirs('testfolder')
 
