@@ -175,7 +175,7 @@ void kill_all_inactive_processes()
     int i;
     for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
     {
-        if (pids[i].pid != 0 && !waitpid(pids[i].pid, NULL, WNOHANG) == 0)
+        if (pids[i].pid != 0 && !(waitpid(pids[i].pid, NULL, WNOHANG) == 0))
         {
             memset(&pids[i], 0, sizeof(pids[i]));
         }
