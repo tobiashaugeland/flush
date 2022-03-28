@@ -284,7 +284,13 @@ int main()
                 }
             }
         }
-        free(parsed_array->argv);
+        for(int i = 0; i < 16; i++)
+        {
+            if(parsed_array[i].argv != NULL)
+            {
+                free(parsed_array[i].argv);
+            }
+        }
         fflush(NULL);
     }
 }
