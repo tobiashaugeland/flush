@@ -80,6 +80,8 @@ def test_six():
     process.stdin.write('sleep 5 & \n')
     sleep = pgrep.pgrep('sleep')
     assert len(sleep) >= 1, 'The sleep process is not found'
+    jobs = execute_command('jobs')
+    assert jobs.find('sleep') != -1, 'The sleep process is not found'
     print('Test six passed')
 
 

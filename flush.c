@@ -231,6 +231,7 @@ int main()
         else if (strcmp(internal_command, "jobs") == 0)
         {
             print_active_processes();
+            fflush(NULL);
             continue;
         }
 
