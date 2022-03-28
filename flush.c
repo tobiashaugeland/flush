@@ -157,9 +157,8 @@ void execute_task(int n, command_list *input_list)
         }
         else
         {
-            arg_list = realloc(arg_list, strlen(*input) + 1);
-            arg_list[index] = *input;
-            index++;
+            arg_list = realloc(arg_list, sizeof(char *) * (++index));
+            arg_list[index - 1] = *input;
         }
         *input++;
     }
