@@ -30,7 +30,6 @@ process_data pids[MAX_BACKGROUND_PROCESSES];
  */
 int change_directory(char *pathname)
 {
-    pathname[strcspn(pathname, "\n")] = 0;
     int ret = chdir(pathname);
     if (ret == -1)
     {
@@ -210,6 +209,7 @@ int main()
             printf("\n");
             exit(0);
         }
+        buf[strcspn(buf, "\n")] = 0;
 
         kill_all_inactive_processes();
 
@@ -252,6 +252,11 @@ int main()
             {
                 n_pipe++;
             }
+        }
+
+        if (strlen(buf) == 0)
+        {
+            continue;
         }
 
         pid_t child_pid = fork();
