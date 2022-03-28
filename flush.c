@@ -36,20 +36,19 @@ int change_directory(char *pathname)
     return 0;
 }
 
-char **smaller_parsing(char* input)
+char **smaller_parsing(char *input)
 {
     char **argv = NULL;
     int i = 0;
-    char *token = strtok(input, " ");
+    char *token = strtok(input, " \t");
     while (token)
     {
         argv = realloc(argv, sizeof(char *) * (++i));
         token[strcspn(token, "\r\n")] = 0;
-        argv[i-1] = token;
+        argv[i - 1] = token;
         token = strtok(NULL, " ");
-
     }
-    argv = realloc(argv, sizeof(char *) * (i+1));
+    argv = realloc(argv, sizeof(char *) * (i + 1));
     argv[i] = NULL;
     return argv;
 }
@@ -59,14 +58,13 @@ void parse_input(char *input, command_list *command_list)
     char *pipe_token = strtok(input, "|");
     int index = 0;
 
-    while (pipe_token != NULL)
+    while (pipe_token)
     {
         char **parsed_array = smaller_parsing(pipe_token);
-        command_list[index].argv = parsed_array;
+        command_list[index++].argv = parsed_array;
         pipe_token = strtok(NULL, "|");
-        printf("%s\n", parsed_array[0]);
-        index++;
     }
+    printf("index: %d\n", index);
 }
 
 int pipe_task(int in, int out, command_list *command_list)
@@ -214,7 +212,7 @@ int main()
 
         int n_pipe = 0;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 16; i++)
         {
             if (parsed_array[i].argv != NULL)
             {
