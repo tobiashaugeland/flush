@@ -239,6 +239,7 @@ int main()
                 }
             }
         }
+        free(parsed_array->argv);
         fflush(NULL);
     }
 }
