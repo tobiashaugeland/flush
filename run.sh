@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 pgrep=$(python3 -m pip list | grep pgrep)
 
 if [[ ! $pgrep ]];
