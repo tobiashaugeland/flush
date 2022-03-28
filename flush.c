@@ -16,6 +16,10 @@ typedef struct
     char command[128];
 } process_data;
 
+typedef struct {
+    const char **argv;
+} command_list;
+
 process_data pids[MAX_BACKGROUND_PROCESSES];
 
 int change_directory(char *pathname)
