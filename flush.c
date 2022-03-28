@@ -44,7 +44,7 @@ char **smaller_parsing(char *input)
     while (token)
     {
         argv = realloc(argv, sizeof(char *) * (++i));
-        token[strcspn(token, "\r\n")] = 0;
+        token[strcspn(token, " \r\n")] = 0;
         argv[i - 1] = token;
         token = strtok(NULL, " ");
     }
@@ -55,16 +55,16 @@ char **smaller_parsing(char *input)
 
 void parse_input(char *input, command_list *command_list)
 {
-    char *pipe_token = strtok(input, "|");
+    char *input_copy = strdup(input);
     int index = 0;
+    char *p;
 
-    while (pipe_token)
+    while ((p = strsep(&input_copy, "|")))
     {
-        char **parsed_array = smaller_parsing(pipe_token);
-        command_list[index++].argv = parsed_array;
-        pipe_token = strtok(NULL, "|");
+        command_list[index].argv = smaller_parsing(p);
+        index++;
     }
-    printf("index: %d\n", index);
+    free(input_copy);
 }
 
 int pipe_task(int in, int out, command_list *command_list)
@@ -106,13 +106,9 @@ void execute_task(int n, command_list *input_list)
         in = fd[0];
     }
 
-    if (in != 0)
-    {
-        dup2(in, 0);
-    }
 
     char **arg_list = NULL;
-    char **input = input_list->argv;
+    char **input = (input_list+i)->argv;
     int index = 0;
     while (*input)
     {
@@ -134,6 +130,10 @@ void execute_task(int n, command_list *input_list)
             index++;
         }
         *input++;
+    }
+    if (in != 0)
+    {
+        dup2(in, 0);
     }
     execvp(arg_list[0], arg_list);
 }
