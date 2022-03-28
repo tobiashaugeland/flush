@@ -16,13 +16,17 @@ typedef struct
     char command[128];
 } process_data;
 
+typedef struct
+{
+    char **argv;
+} command_list;
+
 process_data pids[MAX_BACKGROUND_PROCESSES];
 
 int change_directory(char *pathname)
 {
     pathname[strcspn(pathname, "\n")] = 0;
-    int ret;
-    ret = chdir(pathname);
+    int ret = chdir(pathname);
     if (ret == -1)
     {
         perror("could not change directory");
@@ -31,29 +35,77 @@ int change_directory(char *pathname)
     return 0;
 }
 
-
-char **parse_input(char *input)
+char **smaller_parsing(char *input)
 {
-    char **parsed_array = NULL;
+    char **argv = NULL;
+    int i = 0;
     char *token = strtok(input, " \t");
-
-    int length = 0;
     while (token)
     {
-        parsed_array = realloc(parsed_array, sizeof(char *) * (++length));
-        token[strcspn(token, "\r\n")] = 0;
-        parsed_array[length - 1] = token;
+        argv = realloc(argv, sizeof(char *) * (++i));
+        token[strcspn(token, " \r\n")] = 0;
+        argv[i - 1] = token;
         token = strtok(NULL, " ");
     }
-    parsed_array = realloc(parsed_array, sizeof(char *) * (length + 1));
-    parsed_array[length] = NULL;
-
-    return parsed_array;
+    argv = realloc(argv, sizeof(char *) * (i + 1));
+    argv[i] = NULL;
+    return argv;
 }
 
-void execute_task(char **input)
+void parse_input(char *input, command_list *command_list)
 {
+    char *input_copy = strdup(input);
+    int index = 0;
+    char *p;
+
+    while ((p = strsep(&input_copy, "|")))
+    {
+        command_list[index++].argv = smaller_parsing(p);
+    }
+    free(input_copy);
+}
+
+int pipe_task(int in, int out, command_list *command_list)
+{
+    pid_t pid;
+
+    if ((pid = fork()) == 0)
+    {
+        if (in != 0)
+        {
+            dup2(in, 0);
+            close(in);
+        }
+
+        if (out != 1)
+        {
+            dup2(out, 1);
+            close(out);
+        }
+
+        return execvp(command_list->argv[0], command_list->argv);
+    }
+
+    return pid;
+}
+
+void execute_task(int n, command_list *input_list)
+{
+    int i;
+    pid_t pid;
+    int in, fd[2];
+    in = 0;
+
+    for (i = 0; i < n - 1; i++)
+    {
+        pipe(fd);
+        pipe_task(in, fd[1], input_list + i);
+        close(fd[1]);
+        in = fd[0];
+    }
+
     char **arg_list = NULL;
+    char **input = (input_list + i)->argv;
     int index = 0;
     while (*input)
     {
@@ -75,6 +127,10 @@ void execute_task(char **input)
             index++;
         }
         *input++;
+    }
+    if (in != 0)
+    {
+        dup2(in, 0);
     }
     execvp(arg_list[0], arg_list);
 }
@@ -142,18 +198,29 @@ int main()
             continue;
         }
 
-        else if(strstr(internal_command, "cd") != NULL)
+        else if (strstr(internal_command, "cd") != NULL)
         {
             change_directory(buf + 3);
             continue;
         }
 
-        char **parsed_array = parse_input(buf);
-        // execute_task(parsed_array);
+        command_list parsed_array[16] = {0};
+        parse_input(buf, parsed_array);
+
+        int n_pipe = 0;
+
+        for (int i = 0; i < 16; i++)
+        {
+            if (parsed_array[i].argv != NULL)
+            {
+                n_pipe++;
+            }
+        }
+
         pid_t child_pid = fork();
         if (child_pid == 0)
         {
-            execute_task(parsed_array);
+            execute_task(n_pipe, parsed_array);
         }
         else
         {
