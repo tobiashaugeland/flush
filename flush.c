@@ -26,8 +26,7 @@ process_data pids[MAX_BACKGROUND_PROCESSES];
 int change_directory(char *pathname)
 {
     pathname[strcspn(pathname, "\n")] = 0;
-    int ret;
-    ret = chdir(pathname);
+    int ret = chdir(pathname);
     if (ret == -1)
     {
         perror("could not change directory");
@@ -61,8 +60,7 @@ void parse_input(char *input, command_list *command_list)
 
     while ((p = strsep(&input_copy, "|")))
     {
-        command_list[index].argv = smaller_parsing(p);
-        index++;
+        command_list[index++].argv = smaller_parsing(p);
     }
     free(input_copy);
 }
@@ -106,9 +104,8 @@ void execute_task(int n, command_list *input_list)
         in = fd[0];
     }
 
-
     char **arg_list = NULL;
-    char **input = (input_list+i)->argv;
+    char **input = (input_list + i)->argv;
     int index = 0;
     while (*input)
     {
