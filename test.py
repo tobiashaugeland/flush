@@ -6,16 +6,19 @@ from time import sleep
 import pgrep
 
 
-parser = argparse.ArgumentParser(description='Test the program')
+parser = argparse.ArgumentParser(description='Test the shell')
 
 parser.add_argument('-f', '--file', help='The file to test', default='flush')
 parser.add_argument('-e', '--extended',
                     help='Run extended tests', action='store_true')
+parser.add_argument(
+    '-d', '--dynamic', help='Run dynamic tests. Use this if you have dynamic arrays', action='store_true')
+parser.add_argument('-a', '--all', help='Run all tests', action='store_true')
 
 args = parser.parse_args()
 file = args.file
-extended = args.extended
-
+extended = args.extended or args.all
+dynamic = args.dynamic or args.all
 
 if not os.path.exists('testfolder'):
     subprocess.run(['mkdir', 'testfolder'])
@@ -99,6 +102,16 @@ def test_seven():
     os.remove('testfile')
     os.remove('testfile2')
 
+
+def test_eight():
+    test_string = 'echo '
+    append_string = 'a '*100
+    append_string += 'a'
+    response = execute_command(test_string+append_string)
+    assert response == append_string, 'The output is not correct'
+    print('Test eight passed')
+
+
 pid = os.fork()
 
 if pid == 0:
@@ -116,16 +129,16 @@ if pid == 0:
     if extended:
         process = restart_process(process)
         test_seven()
+    if dynamic:
+        process = restart_process(process)
+        test_eight()
     os.removedirs('testfolder')
 
 else:
     sleep(2)
-    #check if child has exited
+    # check if child has exited
     if os.waitpid(pid, os.WNOHANG)[0] == 0:
-        print('Test failed, timeout too long. Could probably be that stdout is not flushed')
+        print('Test failed, your shell never responded to input. Could probably be that stdout is not flushed?')
         exit(1)
     else:
         print('All test passed')
-
-
-
