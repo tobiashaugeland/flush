@@ -90,12 +90,14 @@ int pipe_task(int in, int out, command_list *command_list)
     {
         if (in != 0)
         {
+            printf("in was used\n");
             dup2(in, 0);
             close(in);
         }
 
         if (out != 1)
         {
+            printf("out was used\n");
             dup2(out, 1);
             close(out);
         }
@@ -109,6 +111,12 @@ int pipe_task(int in, int out, command_list *command_list)
             {
                 FILE *fp = fopen(*(++command_list->argv), "r");
                 dup2(fileno(fp), 0);
+            }
+            else if (strcmp(*command_list->argv, ">") == 0)
+            {
+                FILE *fp = fopen(*(++command_list->argv), "w");
+                int temp_fp = dup(fileno(fp));
+                dup2(temp_fp, fileno(fp));
             }
             else
             {
