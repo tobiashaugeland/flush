@@ -12,7 +12,7 @@ parser.add_argument('-f', '--file', help='The file to test', default='flush')
 parser.add_argument('-e', '--extended',
                     help='Run extended tests', action='store_true')
 parser.add_argument(
-    '-d', '--dynamic', help='Run dynamic tests. Use this if you have dynamic arrays', action='store_true')
+    '-d', '--dynamic', help='Run dynamic tests. Use this if you have dynamic arrays and want to test memory allocation', action='store_true')
 parser.add_argument('-a', '--all', help='Run all tests', action='store_true')
 
 args = parser.parse_args()
@@ -25,6 +25,8 @@ if not os.path.exists('testfolder'):
 
 
 def test_one():
+    '''First test checks if your shell can exexute a command with path specified'''
+
     runner = pexpect.spawn('./'+file)
     runner.sendline('/bin/echo test')
     runner.expect('test')
@@ -35,6 +37,8 @@ def test_one():
 
 
 def test_two():
+    '''Second test checks if your shell is able change directories'''
+
     runner = pexpect.spawn('./'+file)
     current_dir = os.getcwd()
     runner.write('cd testfolder\n')
@@ -48,6 +52,8 @@ def test_two():
 
 
 def test_three():
+    '''Third test checks if your shell is able to execute a command with no path specified'''
+
     runner = pexpect.spawn('./'+file)
     runner.write('echo test\n')
     runner.expect('test')
@@ -58,6 +64,8 @@ def test_three():
 
 
 def test_four():
+    '''Fourth test checks if your shell is able to execute a command with IO redirection'''
+
     runner = pexpect.spawn('./'+file)
     runner.write('echo heisann > testfile\n')
     sleep(0.05)
@@ -72,6 +80,8 @@ def test_four():
 
 
 def test_five():
+    '''Fifth test checks if your shell is able to execute a command with bidirectional IO redirection'''
+
     runner = pexpect.spawn('./'+file)
     runner.write('head -1 < testfile > testfile2\n')
     sleep(0.05)
@@ -84,6 +94,8 @@ def test_five():
 
 
 def test_six():
+    '''Sixth test checks if your shell is able to execute a command as a background process and if it is able to see it'''
+
     runner = pexpect.spawn('./'+file)
     runner.write('sleep 5 &\n')
     sleep = pgrep.pgrep('sleep')
@@ -97,6 +109,9 @@ def test_six():
 
 
 def test_seven():
+    '''Optional test one:
+    Checks if your shell is able to execute a command with piping'''
+
     local_file = open('testfile', 'w')
     local_file.write('line one\n')
     local_file.write('line two\n')
@@ -112,7 +127,11 @@ def test_seven():
     print('Test seven passed')
 
 
+
 def test_eight():
+    '''Optional test two:
+    Checks if your shell is able to execute a command with dynamic arrays'''
+
     test_string = 'echo '
     append_string = 'a '*100
     append_string += '\n'
@@ -146,6 +165,6 @@ try:
     res = deferred.get(timeout=5)
     print('All tests passed')
 except multiprocessing.TimeoutError:
-    print('TimeoutError, did you remember to fflush stdout in your shell?')
+    print('TimeoutError. This means your shell is halting. Finish the halting problem before continuing')
 
 p.terminate()
