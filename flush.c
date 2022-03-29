@@ -52,7 +52,7 @@ char **smaller_parsing(char *input)
     char *token = strtok(input, " \t");
     while (token)
     {
-        argv = realloc(argv, sizeof(char *) * (++i));
+        argv = realloc(argv, sizeof(*input) * (++i));
         token[strcspn(token, " \r\n")] = 0;
         argv[i - 1] = token;
         token = strtok(NULL, " ");
@@ -112,7 +112,7 @@ int pipe_task(int in, int out, command_list *command_list)
             }
             else
             {
-                argv = realloc(argv, sizeof(char *) * (++index));
+                argv = realloc(argv, sizeof(**command_list->argv) * (++index));
                 argv[index - 1] = *command_list->argv;
             }
             command_list->argv++;
@@ -157,7 +157,7 @@ void execute_task(int n, command_list *input_list)
         }
         else
         {
-            arg_list = realloc(arg_list, sizeof(char *) * (++index));
+            arg_list = realloc(arg_list, sizeof(*input) * (++index));
             arg_list[index - 1] = *input;
         }
         *input++;
