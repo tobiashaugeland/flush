@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE
 import subprocess
 import argparse
 import os
+from time import sleep
 import pgrep
 
 
@@ -98,22 +99,33 @@ def test_seven():
     os.remove('testfile')
     os.remove('testfile2')
 
+pid = os.fork()
 
-test_one()
-process = restart_process(process)
-test_two()
-process = restart_process(process)
-test_three()
-process = restart_process(process)
-test_four()
-process = restart_process(process)
-test_five()
-process = restart_process(process)
-test_six()
-if extended:
+if pid == 0:
+    test_one()
     process = restart_process(process)
-    test_seven()
+    test_two()
+    process = restart_process(process)
+    test_three()
+    process = restart_process(process)
+    test_four()
+    process = restart_process(process)
+    test_five()
+    process = restart_process(process)
+    test_six()
+    if extended:
+        process = restart_process(process)
+        test_seven()
+    os.removedirs('testfolder')
 
-os.removedirs('testfolder')
+else:
+    sleep(2)
+    #check if child has exited
+    if os.waitpid(pid, os.WNOHANG)[0] == 0:
+        print('Test failed, timeout too long. Could probably be that stdout is not flushed')
+        exit(1)
+    else:
+        print('All test passed')
 
-print('All test passed')
+
+
