@@ -28,7 +28,8 @@ def test_one():
     runner = pexpect.spawn('./'+file)
     runner.sendline('/bin/echo test')
     runner.expect('test')
-    assert runner.after == b'test', 'The output is not correct, was: ' + str(runner.after)
+    assert runner.after == b'test', 'The output is not correct, was: ' + \
+        str(runner.after)
     runner.kill(0)
     print('Test one passed')
 
@@ -114,7 +115,7 @@ def test_seven():
 def test_eight():
     test_string = 'echo '
     append_string = 'a '*100
-    append_string += 'a\n'
+    append_string += '\n'
     runner = pexpect.spawn('./'+file)
     runner.write(test_string+append_string)
     runner.expect('a '*100)
@@ -136,6 +137,7 @@ def main():
     if dynamic:
         test_eight()
     os.removedirs('testfolder')
+
 
 p = multiprocessing.Pool(1)
 
