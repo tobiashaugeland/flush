@@ -110,6 +110,11 @@ int pipe_task(int in, int out, command_list *command_list)
                 FILE *fp = fopen(*(++command_list->argv), "r");
                 dup2(fileno(fp), 0);
             }
+            else if (strcmp(*command_list->argv, ">") == 0)
+            {
+                FILE *fp = fopen(*(++command_list->argv), "w");
+                dup2(fileno(fp), 1);
+            }
             else
             {
                 argv = realloc(argv, sizeof(**command_list->argv) * (++index));
