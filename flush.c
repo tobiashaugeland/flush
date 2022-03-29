@@ -52,7 +52,7 @@ char **smaller_parsing(char *input)
     char *token = strtok(input, " \t");
     while (token)
     {
-        argv = realloc(argv, sizeof(char *) * (++i));
+        argv = realloc(argv, sizeof(input) * (++i));
         token[strcspn(token, " \r\n")] = 0;
         argv[i - 1] = token;
         token = strtok(NULL, " ");
