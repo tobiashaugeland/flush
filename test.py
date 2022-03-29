@@ -2,8 +2,8 @@ from subprocess import Popen, PIPE
 import subprocess
 import argparse
 import os
-from time import sleep
 import pgrep
+import multiprocessing
 
 
 parser = argparse.ArgumentParser(description='Test the shell')
@@ -112,9 +112,8 @@ def test_eight():
     print('Test eight passed')
 
 
-pid = os.fork()
-
-if pid == 0:
+def main():
+    global process
     test_one()
     process = restart_process(process)
     test_two()
@@ -134,11 +133,14 @@ if pid == 0:
         test_eight()
     os.removedirs('testfolder')
 
-else:
-    sleep(2)
-    # check if child has exited
-    if os.waitpid(pid, os.WNOHANG)[0] == 0:
-        print('Test failed, your shell never responded to input. Could probably be that stdout is not flushed?')
-        exit(1)
-    else:
-        print('All test passed')
+p = multiprocessing.Pool(1)
+
+deferred = p.apply_async(main)
+try:
+    res = deferred.get(timeout=5)
+    print('All tests passed')
+except multiprocessing.TimeoutError:
+    print('TimeoutError, did you remember to fflush stdout in your shell?')
+    process.kill()
+
+p.terminate()
