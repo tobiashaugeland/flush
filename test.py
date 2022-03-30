@@ -120,12 +120,12 @@ def test_seven():
     sleep(0.05)
     local_file = open('testfile2', 'r')
     assert local_file.readline().strip() == 'line one', 'The file is not correct'
-    assert local_file.readline().strip() == '', 'The file is not correct, it should have been empty'
+    assert local_file.readline().strip(
+    ) == '', 'The file is not correct, it should have been empty'
     os.remove('testfile')
     os.remove('testfile2')
     runner.kill(0)
     print('Test seven passed')
-
 
 
 def test_eight():
@@ -156,6 +156,7 @@ def main():
     if dynamic:
         test_eight()
     os.removedirs('testfolder')
+
 
 if __name__ == '__main__':
     p = multiprocessing.Pool(1)
