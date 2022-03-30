@@ -5,7 +5,6 @@ import pgrep
 import multiprocessing
 import pexpect
 
-
 parser = argparse.ArgumentParser(description='Test the shell')
 
 parser.add_argument('-f', '--file', help='The file to test', default='flush')
@@ -121,6 +120,7 @@ def test_seven():
     sleep(0.05)
     local_file = open('testfile2', 'r')
     assert local_file.readline().strip() == 'line one', 'The file is not correct'
+    assert local_file.readline().strip() == '', 'The file is not correct, it should have been empty'
     os.remove('testfile')
     os.remove('testfile2')
     runner.kill(0)
