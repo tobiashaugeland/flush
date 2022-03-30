@@ -157,14 +157,14 @@ def main():
         test_eight()
     os.removedirs('testfolder')
 
+if __name__ == '__main__':
+    p = multiprocessing.Pool(1)
 
-p = multiprocessing.Pool(1)
+    deferred = p.apply_async(main)
+    try:
+        res = deferred.get(timeout=5)
+        print('All tests passed')
+    except multiprocessing.TimeoutError:
+        print('TimeoutError. This means your shell is halting. Finish the halting problem before continuing')
 
-deferred = p.apply_async(main)
-try:
-    res = deferred.get(timeout=5)
-    print('All tests passed')
-except multiprocessing.TimeoutError:
-    print('TimeoutError. This means your shell is halting. Finish the halting problem before continuing')
-
-p.terminate()
+    p.terminate()
