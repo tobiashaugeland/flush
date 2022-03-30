@@ -5,7 +5,6 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
-#include <linux/limits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
@@ -203,7 +202,7 @@ int main()
     int pid_index = 0;
     while (1)
     {
-        char buf[PATH_MAX];
+        char buf[4096];
         // print current directory
         printf("%s: ", getcwd(NULL, 0));
 
