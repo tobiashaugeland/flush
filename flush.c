@@ -238,7 +238,7 @@ int main()
             continue;
         }
 
-        else if (strstr(internal_command, "cd") != NULL)
+        else if (strncmp(internal_command, "cd", 2) == 0)
         {
             change_directory(buf + 3);
             continue;
@@ -287,9 +287,9 @@ int main()
                 }
             }
         }
-        for(int i = 0; i < 16; i++)
+        for (int i = 0; i < 16; i++)
         {
-            if(parsed_array[i].argv != NULL)
+            if (parsed_array[i].argv != NULL)
             {
                 free(parsed_array[i].argv);
             }
