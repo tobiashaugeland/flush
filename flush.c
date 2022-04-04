@@ -172,6 +172,7 @@ void execute_task(int n, command_list *input_list)
     }
     execvp(arg_list[0], arg_list);
 
+    perror("execvp");
     exit(1);
 }
 
