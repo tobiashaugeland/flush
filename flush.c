@@ -171,6 +171,8 @@ void execute_task(int n, command_list *input_list)
         dup2(in, 0);
     }
     execvp(arg_list[0], arg_list);
+
+    exit(1);
 }
 
 void kill_all_inactive_processes()
