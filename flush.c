@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #define MAX_BACKGROUND_PROCESSES 10
+#define MAX_PATH 4096
 typedef struct process_data
 {
     pid_t pid;
@@ -107,12 +108,12 @@ int pipe_task(int in, int out, command_list *command_list)
             if (strcmp(*command_list->argv, "<") == 0)
             {
                 FILE *fp = fopen(*(++command_list->argv), "r");
-                dup2(fileno(fp), 0);
+                dup2(fileno(fp), STDIN_FILENO);
             }
             else if (strcmp(*command_list->argv, ">") == 0)
             {
                 FILE *fp = fopen(*(++command_list->argv), "w");
-                dup2(fileno(fp), 1);
+                dup2(fileno(fp), STDOUT_FILENO);
             }
             else
             {
@@ -123,9 +124,7 @@ int pipe_task(int in, int out, command_list *command_list)
         }
 
         return execvp(argv[0], argv);
-        return -1;
     }
-
     return pid;
 }
 
@@ -139,9 +138,20 @@ void execute_task(int n, command_list *input_list)
     {
         pipe(fd);
         pid = pipe_task(in, fd[1], input_list + i);
-        if(pid = -1) exit(1);
+        if(pid == -1) {
+            perror("error in executing task");
+            exit(1);
+        }
         close(fd[1]);
-        wait(NULL);
+        int status;
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status))
+        {
+            if (WEXITSTATUS(status) != 0)
+            {
+                exit(WEXITSTATUS(status));
+            }
+        }
         in = fd[0];
     }
 
@@ -159,7 +169,7 @@ void execute_task(int n, command_list *input_list)
         else if (strcmp(*input, ">") == 0)
         {
             FILE *fp = fopen(*(++input), "w");
-            dup2(fileno(fp), 1);
+            dup2(fileno(fp), STDOUT_FILENO);
         }
         else
         {
@@ -207,7 +217,7 @@ int main()
     int pid_index = 0;
     while (1)
     {
-        char buf[4096];
+        char buf[MAX_PATH];
         // print current directory
         printf("%s: ", getcwd(NULL, 0));
 
