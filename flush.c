@@ -54,7 +54,7 @@ char **smaller_parsing(char *input)
         argv = realloc(argv, sizeof(input) * (++i));
         token[strcspn(token, " \r\n")] = 0;
         argv[i - 1] = token;
-        token = strtok(NULL, " ");
+        token = strtok(NULL, " \t");
     }
     argv = realloc(argv, sizeof(char *) * (i + 1));
     argv[i] = NULL;
@@ -74,7 +74,7 @@ void parse_input(char *input, command_list *command_list)
     int index = 0;
     char *p;
 
-    while ((p = strsep(&input_copy, "|")))
+    while (p = strsep(&input_copy, "|"))
     {
         command_list[index++].argv = smaller_parsing(p);
     }
