@@ -138,7 +138,8 @@ void execute_task(int n, command_list *input_list)
     {
         pipe(fd);
         pid = pipe_task(in, fd[1], input_list + i);
-        if(pid == -1) {
+        if (pid == -1)
+        {
             perror("error in executing task");
             exit(1);
         }
@@ -231,6 +232,11 @@ int main()
 
         kill_all_inactive_processes();
 
+        if (strlen(buf) == 0)
+        {
+            continue;
+        }
+
         // remove all data in input after &
         char *res = strstr(buf, "&");
         if (res)
@@ -271,11 +277,6 @@ int main()
             {
                 n_pipe++;
             }
-        }
-
-        if (strlen(buf) == 0)
-        {
-            continue;
         }
 
         pid_t child_pid = fork();
