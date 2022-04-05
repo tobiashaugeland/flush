@@ -9,13 +9,13 @@
 #include <sys/wait.h>
 
 #define MAX_BACKGROUND_PROCESSES 10
-typedef struct
+typedef struct process_data
 {
     pid_t pid;
     char command[128];
 } process_data;
 
-typedef struct
+typedef struct command_list
 {
     char **argv;
 } command_list;
@@ -123,6 +123,7 @@ int pipe_task(int in, int out, command_list *command_list)
         }
 
         return execvp(argv[0], argv);
+        return -1;
     }
 
     return pid;
@@ -138,6 +139,7 @@ void execute_task(int n, command_list *input_list)
     {
         pipe(fd);
         pid = pipe_task(in, fd[1], input_list + i);
+        if(pid = -1) exit(1);
         close(fd[1]);
         wait(NULL);
         in = fd[0];
