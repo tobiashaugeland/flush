@@ -140,7 +140,6 @@ void execute_task(int n, command_list *input_list)
         pid = pipe_task(in, fd[1], input_list + i);
         if (pid == -1)
         {
-            perror("error in executing task");
             exit(1);
         }
         close(fd[1]);
