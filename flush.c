@@ -74,7 +74,6 @@ void parse_input(char *input, command_list *command_list)
     char *input_copy = strdup(input);
     int index = 0;
     char *p;
-
     while (p = strsep(&input_copy, "|"))
     {
         command_list[index++].argv = smaller_parsing(p);
@@ -193,8 +192,10 @@ void kill_all_inactive_processes()
     int i;
     for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
     {
-        if (pids[i].pid != 0 && !(waitpid(pids[i].pid, NULL, WNOHANG) == 0))
+        int status;
+        if (pids[i].pid != 0 && !(waitpid(pids[i].pid, &status, WNOHANG) == 0))
         {
+            printf("Exit status [%s] = %d\n", pids[i].command, WEXITSTATUS(status));
             memset(&pids[i], 0, sizeof(pids[i]));
         }
     }
