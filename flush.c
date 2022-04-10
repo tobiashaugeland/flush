@@ -62,15 +62,15 @@ char **smaller_parsing(char *input)
  * @param input The input string
  * @return number of tasks to be executed
  */
-int parse_input(char *input, command_list *command_list)
+int parse_input(char *input, command_list *list)
 {
     char *input_copy = strdup(input);
     int index = 0;
     char *p;
     while (p = strsep(&input_copy, "|"))
     {
-        command_list = realloc(command_list, sizeof(command_list) * (++index));
-        command_list[index - 1].argv = smaller_parsing(p);
+        list[index].argv = smaller_parsing(p);
+        index++;
     }
     free(input_copy);
     return index;
@@ -151,6 +151,7 @@ void execute_task(int n, command_list *input_list)
 
     char **arg_list = NULL;
     char **input = (input_list + i)->argv;
+
     index = 0;
     while (*input)
     {
@@ -211,6 +212,7 @@ void print_active_processes(node *head)
         printf("[%d] %s\n", pid, data);
     }
 }
+
 int main()
 {
     node *head = init_list();
@@ -263,7 +265,6 @@ int main()
             continue;
         }
 
-        // Please don't pipe more than 16 commands, okay? Thank you, bye.
         command_list *parsed_array = malloc(sizeof(command_list));
         int n_pipe = parse_input(buf, parsed_array);
 
@@ -290,13 +291,12 @@ int main()
                     printf("Exit status = %d\n", WEXITSTATUS(status));
                 }
             }
+            // for (int i = 0; i < n_pipe; i++)
+            // {
+            //     free(parsed_array[i].argv);
+            // }
+            // free(parsed_array);
         }
-
-        for (int i = 0; i < n_pipe; i++)
-        {
-            free(parsed_array[i].argv);
-        }
-        free(parsed_array);
 
         fflush(NULL);
     }
