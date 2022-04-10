@@ -265,7 +265,7 @@ int main()
             continue;
         }
 
-        command_list *parsed_array = malloc(sizeof(command_list)* strlen(buf));
+        command_list *parsed_array = malloc(sizeof(command_list) * strlen(buf));
         int n_pipe = parse_input(buf, parsed_array);
 
         pid_t child_pid = fork();
@@ -290,17 +290,13 @@ int main()
                 {
                     printf("Exit status = %d\n", WEXITSTATUS(status));
                 }
-                if (status == 0)
+                for (int i = 0; i < n_pipe; i++)
                 {
-                    for (int i = 0; i < n_pipe; i++)
-                    {
-                        free(parsed_array[i].argv);
-                    }
+                    free(parsed_array[i].argv);
                 }
+                free(parsed_array);
             }
-            free(parsed_array);
-        }
 
-        fflush(NULL);
+            fflush(NULL);
+        }
     }
-}
