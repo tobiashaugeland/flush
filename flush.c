@@ -193,7 +193,7 @@ void kill_all_inactive_processes(node *head)
         if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
         {
             printf("Exit status: %d\n", WEXITSTATUS(status));
-            // deleteNode(head, current);
+            deleteNode(head, current);
         }
     }
 

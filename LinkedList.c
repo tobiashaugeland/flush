@@ -43,7 +43,7 @@ int deleteNode(node *head, node *n)
         if (current->next == n)
         {
             current->next = n->next;
-            free(n);
+            //free(n); Why won't this work?
             return 0;
         }
         current = current->next;
