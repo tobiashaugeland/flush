@@ -11,11 +11,6 @@
 
 #define MAX_BACKGROUND_PROCESSES 10
 #define MAX_PATH 4096
-typedef struct process_data
-{
-    pid_t pid;
-    char command[128];
-} process_data;
 
 typedef struct command_list
 {
@@ -191,21 +186,20 @@ void execute_task(int n, command_list *input_list)
 void kill_all_inactive_processes(node *head)
 {
     node *current = head;
-    if(current == NULL)
+    if (current == NULL)
     {
         printf("No background processes running\n");
     }
-    while(current != NULL)
+    while (current->next != NULL)
     {
         int status;
-        if(!(waitpid(getPid(current), &status, WNOHANG)))
+        if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
         {
             printf("Exit status: %d\n", WEXITSTATUS(status));
             deleteNode(head, current);
         }
         current = next_node(current);
     }
-
 
     // int i;
     // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
@@ -221,11 +215,16 @@ void kill_all_inactive_processes(node *head)
 
 void print_active_processes(node *head)
 {
-
-    while (head != NULL)
+    node *current = head;
+    if (current == NULL)
     {
-        printf("[%d]\n", getPid(head));
-        head = next_node(head);
+        printf("No background processes running\n");
+    }
+    while (current->next != NULL)
+    {
+        pid_t pid = getPid(current);
+        printf("[%d]\n", pid);
+        current = next_node(current);
     }
     // int i;
     // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
@@ -238,7 +237,7 @@ void print_active_processes(node *head)
 }
 int main()
 {
-    node *head = NULL;
+    node *head = init_list();
     int pid_index = 0;
     while (1)
     {
@@ -316,10 +315,6 @@ int main()
                 data.pid = child_pid;
                 strcpy(data.command, buf);
                 addNode(head, &data);
-                if(head == NULL)
-                {
-                    printf("satan\n");
-                }
                 // pids[pid_index++ % 16] = data;
             }
             else

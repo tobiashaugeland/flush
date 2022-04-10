@@ -2,20 +2,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-typedef struct process_data
-{
-    pid_t pid;
-    char command[128];
-} process_data;
-
-typedef struct node {
-    process_data *data;
-    struct node *next;
-} node;
-
 node *init_list()
 {
-    return NULL;
+    node *head = malloc(sizeof(node));
+    head->data = NULL;
+    head->next = NULL;
+    return head;
 }
 
 node *createNode(process_data *data)
@@ -29,9 +21,10 @@ node *createNode(process_data *data)
 int addNode(node *head, process_data *data)
 {
     node *newNode = createNode(data);
-    if (head == NULL)
+    if (head->data == NULL)
     {
-        head = newNode;
+        head->data = newNode->data;
+        head->next = newNode;
         return 0;
     }
     node *current = head;
@@ -73,7 +66,6 @@ pid_t getPid(node *n)
 {
     return n->data->pid;
 }
-
 
 node *next_node(node *n)
 {

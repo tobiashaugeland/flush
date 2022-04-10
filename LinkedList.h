@@ -1,8 +1,16 @@
 #include <sys/types.h>
 
-typedef struct node node;
 
-typedef struct process_data process_data;
+typedef struct process_data
+{
+    pid_t pid;
+    char command[128];
+} process_data;
+
+typedef struct node {
+    process_data *data;
+    struct node *next;
+} node;
 
 node *init_list();
 
