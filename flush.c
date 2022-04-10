@@ -265,7 +265,7 @@ int main()
             continue;
         }
 
-        command_list *parsed_array = malloc(sizeof(command_list));
+        command_list *parsed_array = malloc(sizeof(command_list)* strlen(buf));
         int n_pipe = parse_input(buf, parsed_array);
 
         pid_t child_pid = fork();
