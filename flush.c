@@ -60,18 +60,20 @@ char **smaller_parsing(char *input)
  * seperated by pipes.
  *
  * @param input The input string
- * @return A command_list struct where the commands are to be stored
+ * @return number of tasks to be executed
  */
-void parse_input(char *input, command_list *command_list)
+int parse_input(char *input, command_list *command_list)
 {
     char *input_copy = strdup(input);
     int index = 0;
     char *p;
     while (p = strsep(&input_copy, "|"))
     {
-        command_list[index++].argv = smaller_parsing(p);
+        command_list = realloc(command_list, sizeof(command_list) * (++index));
+        command_list[index - 1].argv = smaller_parsing(p);
     }
     free(input_copy);
+    return index;
 }
 
 int pipe_task(int in, int out, command_list *command_list)
@@ -262,18 +264,8 @@ int main()
         }
 
         // Please don't pipe more than 16 commands, okay? Thank you, bye.
-        command_list parsed_array[16] = {0};
-        parse_input(buf, parsed_array);
-
-        int n_pipe = 0;
-
-        for (int i = 0; i < 16; i++)
-        {
-            if (parsed_array[i].argv != NULL)
-            {
-                n_pipe++;
-            }
-        }
+        command_list *parsed_array = malloc(sizeof(command_list));
+        int n_pipe = parse_input(buf, parsed_array);
 
         pid_t child_pid = fork();
         if (child_pid == 0)
@@ -299,13 +291,13 @@ int main()
                 }
             }
         }
-        for (int i = 0; i < 16; i++)
+
+        for (int i = 0; i < n_pipe; i++)
         {
-            if (parsed_array[i].argv != NULL)
-            {
-                free(parsed_array[i].argv);
-            }
+            free(parsed_array[i].argv);
         }
+        free(parsed_array);
+
         fflush(NULL);
     }
 }
