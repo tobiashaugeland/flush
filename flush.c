@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include "LinkedList.h"
 
 #define MAX_BACKGROUND_PROCESSES 10
 #define MAX_PATH 4096
@@ -187,34 +188,57 @@ void execute_task(int n, command_list *input_list)
     exit(1);
 }
 
-void kill_all_inactive_processes()
+void kill_all_inactive_processes(node *head)
 {
-    int i;
-    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    node *current = head;
+    if(current == NULL)
+    {
+        printf("No background processes running\n");
+    }
+    while(current != NULL)
     {
         int status;
-        if (pids[i].pid != 0 && !(waitpid(pids[i].pid, &status, WNOHANG) == 0))
+        if(!(waitpid(getPid(current), &status, WNOHANG)))
         {
-            printf("Exit status [%s] = %d\n", pids[i].command, WEXITSTATUS(status));
-            memset(&pids[i], 0, sizeof(pids[i]));
+            printf("Exit status: %d\n", WEXITSTATUS(status));
+            deleteNode(head, current);
         }
+        current = next_node(current);
     }
+
+
+    // int i;
+    // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    // {
+    //     int status;
+    //     if (pids[i].pid != 0 && !(waitpid(pids[i].pid, &status, WNOHANG) == 0))
+    //     {
+    //         printf("Exit status [%s] = %d\n", pids[i].command, WEXITSTATUS(status));
+    //         memset(&pids[i], 0, sizeof(pids[i]));
+    //     }
+    // }
 }
 
-void print_active_processes()
+void print_active_processes(node *head)
 {
-    int i;
-    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
-    {
-        if (pids[i].pid != 0)
-        {
-            printf("[%d] %s\n", pids[i].pid, pids[i].command);
-        }
-    }
-}
 
+    while (head != NULL)
+    {
+        printf("[%d]\n", getPid(head));
+        head = next_node(head);
+    }
+    // int i;
+    // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    // {
+    //     if (pids[i].pid != 0)
+    //     {
+    //         printf("[%d] %s\n", pids[i].pid, pids[i].command);
+    //     }
+    // }
+}
 int main()
 {
+    node *head = NULL;
     int pid_index = 0;
     while (1)
     {
@@ -230,7 +254,7 @@ int main()
         }
         buf[strcspn(buf, "\n")] = 0;
 
-        kill_all_inactive_processes();
+        kill_all_inactive_processes(head);
 
         if (strlen(buf) == 0)
         {
@@ -254,7 +278,7 @@ int main()
 
         else if (strcmp(internal_command, "jobs") == 0)
         {
-            print_active_processes();
+            print_active_processes(head);
             fflush(NULL);
             continue;
         }
@@ -291,7 +315,12 @@ int main()
                 process_data data;
                 data.pid = child_pid;
                 strcpy(data.command, buf);
-                pids[pid_index++ % 16] = data;
+                addNode(head, &data);
+                if(head == NULL)
+                {
+                    printf("satan\n");
+                }
+                // pids[pid_index++ % 16] = data;
             }
             else
             {
