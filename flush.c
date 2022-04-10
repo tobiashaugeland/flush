@@ -16,7 +16,6 @@ typedef struct command_list
     char **argv;
 } command_list;
 
-
 /**
  * @brief Changes current working directory to the given path
  *
@@ -213,7 +212,6 @@ void print_active_processes(node *head)
 int main()
 {
     node *head = init_list();
-    int pid_index = 0;
     while (1)
     {
         char buf[MAX_PATH];
