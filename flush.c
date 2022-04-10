@@ -291,11 +291,11 @@ int main()
                     printf("Exit status = %d\n", WEXITSTATUS(status));
                 }
             }
-            // for (int i = 0; i < n_pipe; i++)
-            // {
-            //     free(parsed_array[i].argv);
-            // }
-            // free(parsed_array);
+            for (int i = 0; i < n_pipe; i++)
+            {
+                free(parsed_array[i].argv);
+            }
+            free(parsed_array);
         }
 
         fflush(NULL);
