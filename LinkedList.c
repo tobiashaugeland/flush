@@ -21,9 +21,8 @@ node *createNode(process_data *data)
 int addNode(node *head, process_data *data)
 {
     node *newNode = createNode(data);
-    if (head->data == NULL)
+    if (head->next == NULL)
     {
-        head->data = newNode->data;
         head->next = newNode;
         return 0;
     }
@@ -38,16 +37,6 @@ int addNode(node *head, process_data *data)
 
 int deleteNode(node *head, node *n)
 {
-    if (head == NULL)
-    {
-        return -1;
-    }
-    if (head == n)
-    {
-        head = n->next;
-        free(n);
-        return 0;
-    }
     node *current = head;
     while (current->next != NULL)
     {

@@ -186,19 +186,15 @@ void execute_task(int n, command_list *input_list)
 void kill_all_inactive_processes(node *head)
 {
     node *current = head;
-    if (current == NULL)
-    {
-        printf("No background processes running\n");
-    }
     while (current->next != NULL)
     {
+        current = next_node(current);
         int status;
         if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
         {
             printf("Exit status: %d\n", WEXITSTATUS(status));
-            deleteNode(head, current);
+            // deleteNode(head, current);
         }
-        current = next_node(current);
     }
 
     // int i;
@@ -216,15 +212,11 @@ void kill_all_inactive_processes(node *head)
 void print_active_processes(node *head)
 {
     node *current = head;
-    if (current == NULL)
-    {
-        printf("No background processes running\n");
-    }
     while (current->next != NULL)
     {
+        current = next_node(current);
         pid_t pid = getPid(current);
         printf("[%d]\n", pid);
-        current = next_node(current);
     }
     // int i;
     // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
