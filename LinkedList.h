@@ -1,13 +1,13 @@
 #include <sys/types.h>
 
-
 typedef struct process_data
 {
     pid_t pid;
     char command[128];
 } process_data;
 
-typedef struct node {
+typedef struct node
+{
     process_data *data;
     struct node *next;
 } node;
@@ -16,7 +16,7 @@ node *init_list();
 
 node *createNode(process_data *data);
 
-process_data getData(node *n);
+char *getData(node *n);
 
 pid_t getPid(node *n);
 
