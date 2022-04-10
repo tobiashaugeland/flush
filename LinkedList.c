@@ -4,7 +4,7 @@
 
 node *init_list()
 {
-    node *head = malloc(sizeof(node));
+    node *head = (node *)malloc(sizeof(node));
     head->data = NULL;
     head->next = NULL;
     return head;
