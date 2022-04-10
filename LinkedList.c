@@ -25,7 +25,6 @@ int addNode(node *head, process_data *data)
     while (current->next != NULL)
     {
         current = current->next;
-        printf("%d\n", current->data->pid);
     }
     current->next = newNode;
     return 0;
@@ -39,7 +38,7 @@ int deleteNode(node *head, node *n)
         if (current->next == n)
         {
             current->next = n->next;
-            // free(n); //Why won't this work?
+            free(n);
             return 0;
         }
         current = current->next;

@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include "LinkedList.h"
 
-#define MAX_BACKGROUND_PROCESSES 10
 #define MAX_PATH 4096
 
 typedef struct command_list
@@ -17,7 +16,6 @@ typedef struct command_list
     char **argv;
 } command_list;
 
-process_data pids[MAX_BACKGROUND_PROCESSES];
 
 /**
  * @brief Changes current working directory to the given path
@@ -186,8 +184,9 @@ void execute_task(int n, command_list *input_list)
 void kill_all_inactive_processes(node *head)
 {
     node *current = head;
-    while (current->next != NULL)
+    while (current->next)
     {
+        node *prev = current;
         current = next_node(current);
         int status;
         if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
@@ -195,39 +194,21 @@ void kill_all_inactive_processes(node *head)
             printf("Exit status [%s]: %d\n", getData(current), WEXITSTATUS(status));
             free(current->data);
             deleteNode(head, current);
+            current = prev;
         }
     }
-
-    // int i;
-    // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
-    // {
-    //     int status;
-    //     if (pids[i].pid != 0 && !(waitpid(pids[i].pid, &status, WNOHANG) == 0))
-    //     {
-    //         printf("Exit status [%s] = %d\n", pids[i].command, WEXITSTATUS(status));
-    //         memset(&pids[i], 0, sizeof(pids[i]));
-    //     }
-    // }
 }
 
 void print_active_processes(node *head)
 {
     node *current = head;
-    while (current->next != NULL)
+    while (current->next)
     {
         current = next_node(current);
         pid_t pid = getPid(current);
         char *data = getData(current);
         printf("[%d] %s\n", pid, data);
     }
-    // int i;
-    // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
-    // {
-    //     if (pids[i].pid != 0)
-    //     {
-    //         printf("[%d] %s\n", pids[i].pid, pids[i].command);
-    //     }
-    // }
 }
 int main()
 {
@@ -309,7 +290,6 @@ int main()
                 data->pid = child_pid;
                 strcpy(data->command, buf);
                 addNode(head, data);
-                // pids[pid_index++ % 16] = data;
             }
             else
             {
