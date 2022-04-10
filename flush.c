@@ -192,7 +192,8 @@ void kill_all_inactive_processes(node *head)
         int status;
         if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
         {
-            printf("Exit status: %d\n", WEXITSTATUS(status));
+            printf("Exit status [%s]: %d\n", getData(current), WEXITSTATUS(status));
+            free(current->data);
             deleteNode(head, current);
         }
     }
@@ -216,7 +217,8 @@ void print_active_processes(node *head)
     {
         current = next_node(current);
         pid_t pid = getPid(current);
-        printf("[%d]\n", pid);
+        char *data = getData(current);
+        printf("[%d] %s\n", pid, data);
     }
     // int i;
     // for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
@@ -303,10 +305,10 @@ int main()
         {
             if (res)
             {
-                process_data data;
-                data.pid = child_pid;
-                strcpy(data.command, buf);
-                addNode(head, &data);
+                process_data *data = malloc(sizeof(process_data));
+                data->pid = child_pid;
+                strcpy(data->command, buf);
+                addNode(head, data);
                 // pids[pid_index++ % 16] = data;
             }
             else
