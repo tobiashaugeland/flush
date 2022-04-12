@@ -1,9 +1,12 @@
 #include <sys/types.h>
 
+
+#define MAX_PATH 4096
+
 typedef struct process_data
 {
     pid_t pid;
-    char command[128];
+    char command[MAX_PATH];
 } process_data;
 
 typedef struct node

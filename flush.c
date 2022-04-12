@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include "LinkedList.h"
 
-#define MAX_PATH 4096
 
 typedef struct command_list
 {
@@ -69,8 +68,7 @@ int parse_input(char *input, command_list *list)
     char *p;
     while (p = strsep(&input_copy, "|"))
     {
-        list[index].argv = smaller_parsing(p);
-        index++;
+        list[index++].argv = smaller_parsing(p);
     }
     free(input_copy);
     return index;
@@ -300,3 +298,4 @@ int main()
             fflush(NULL);
         }
     }
+}
