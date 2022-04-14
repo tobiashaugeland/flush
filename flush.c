@@ -9,7 +9,6 @@
 #include <sys/wait.h>
 #include "LinkedList.h"
 
-
 typedef struct command_list
 {
     char **argv;
@@ -114,6 +113,8 @@ int pipe_task(int in, int out, command_list *command_list)
             }
             command_list->argv++;
         }
+        argv = realloc(argv, sizeof(char *) * (index + 1));
+        argv[index] = NULL;
 
         return execvp(argv[0], argv);
     }
@@ -171,6 +172,8 @@ void execute_task(int n, command_list *input_list)
         }
         *input++;
     }
+    arg_list = realloc(arg_list, sizeof(char *) * (index + 1));
+    arg_list[index] = NULL;
     if (in != 0)
     {
         dup2(in, 0);
@@ -286,7 +289,7 @@ int main()
                 waitpid(child_pid, &status, 0);
                 if (WIFEXITED(status))
                 {
-                    printf("Exit status = %d\n", WEXITSTATUS(status));
+                    printf("Exit status [%s] = %d\n", parsed_array->argv[0], WEXITSTATUS(status));
                 }
                 for (int i = 0; i < n_pipe; i++)
                 {
