@@ -65,7 +65,7 @@ int parse_input(char *input, command_list *list)
     char *input_copy = strdup(input);
     int index = 0;
     char *p;
-    while (p = strsep(&input_copy, "|"))
+    while ((p = strsep(&input_copy, "|")))
     {
         list[index++].argv = smaller_parsing(p);
     }
@@ -170,7 +170,7 @@ void execute_task(int n, command_list *input_list)
             arg_list = realloc(arg_list, sizeof(*input) * (++index));
             arg_list[index - 1] = *input;
         }
-        *input++;
+        (void)*input++;
     }
     arg_list = realloc(arg_list, sizeof(char *) * (index + 1));
     arg_list[index] = NULL;
