@@ -62,14 +62,12 @@ char **smaller_parsing(char *input)
  */
 int parse_input(char *input, command_list *list)
 {
-    char *input_copy = strdup(input);
     int index = 0;
     char *p;
-    while ((p = strsep(&input_copy, "|")))
+    while ((p = strsep(&input, "|")))
     {
         list[index++].argv = smaller_parsing(p);
     }
-    free(input_copy);
     return index;
 }
 
@@ -222,7 +220,9 @@ int main()
     {
         char buf[MAX_PATH];
         // print current directory
-        printf("%s: ", getcwd(NULL, 0));
+        char *cwd = getcwd(NULL, 0);
+        printf("%s: ", cwd);
+        free(cwd);
 
         // ctrl + d makes fgets return NULL
         if (fgets(buf, sizeof(buf), stdin) == NULL)
