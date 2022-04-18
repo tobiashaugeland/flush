@@ -7,21 +7,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
-#define MAX_BACKGROUND_PROCESSES 10
-#define MAX_PATH 4096
-typedef struct process_data
-{
-    pid_t pid;
-    char command[128];
-} process_data;
+#include "LinkedList.h"
 
 typedef struct command_list
 {
     char **argv;
 } command_list;
-
-process_data pids[MAX_BACKGROUND_PROCESSES];
 
 /**
  * @brief Changes current working directory to the given path
@@ -67,18 +58,17 @@ char **smaller_parsing(char *input)
  * seperated by pipes.
  *
  * @param input The input string
- * @return A command_list struct where the commands are to be stored
+ * @return number of tasks to be executed
  */
-void parse_input(char *input, command_list *command_list)
+int parse_input(char *input, command_list *list)
 {
-    char *input_copy = strdup(input);
     int index = 0;
     char *p;
-    while (p = strsep(&input_copy, "|"))
+    while ((p = strsep(&input, "|")))
     {
-        command_list[index++].argv = smaller_parsing(p);
+        list[index++].argv = smaller_parsing(p);
     }
-    free(input_copy);
+    return index;
 }
 
 int pipe_task(int in, int out, command_list *command_list)
@@ -100,27 +90,30 @@ int pipe_task(int in, int out, command_list *command_list)
         }
 
         char **argv = NULL;
+        char **input = command_list->argv;
         int index = 0;
 
-        while (*command_list->argv)
+        while (*input)
         {
-            if (strcmp(*command_list->argv, "<") == 0)
+            if (strcmp(*input, "<") == 0)
             {
-                FILE *fp = fopen(*(++command_list->argv), "r");
+                FILE *fp = fopen(*(++input), "r");
                 dup2(fileno(fp), STDIN_FILENO);
             }
-            else if (strcmp(*command_list->argv, ">") == 0)
+            else if (strcmp(*input, ">") == 0)
             {
-                FILE *fp = fopen(*(++command_list->argv), "w");
+                FILE *fp = fopen(*(++input), "w");
                 dup2(fileno(fp), STDOUT_FILENO);
             }
             else
             {
-                argv = realloc(argv, sizeof(**command_list->argv) * (++index));
-                argv[index - 1] = *command_list->argv;
+                argv = realloc(argv, sizeof(*input) * (++index));
+                argv[index - 1] = *input;
             }
-            command_list->argv++;
+            (void)*input++;
         }
+        argv = realloc(argv, sizeof(char *) * (index + 1));
+        argv[index] = NULL;
 
         return execvp(argv[0], argv);
     }
@@ -156,6 +149,7 @@ void execute_task(int n, command_list *input_list)
 
     char **arg_list = NULL;
     char **input = (input_list + i)->argv;
+
     index = 0;
     while (*input)
     {
@@ -175,8 +169,10 @@ void execute_task(int n, command_list *input_list)
             arg_list = realloc(arg_list, sizeof(*input) * (++index));
             arg_list[index - 1] = *input;
         }
-        *input++;
+        (void)*input++;
     }
+    arg_list = realloc(arg_list, sizeof(char *) * (index + 1));
+    arg_list[index] = NULL;
     if (in != 0)
     {
         dup2(in, 0);
@@ -187,40 +183,46 @@ void execute_task(int n, command_list *input_list)
     exit(1);
 }
 
-void kill_all_inactive_processes()
+void kill_all_inactive_processes(node *head)
 {
-    int i;
-    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    node *current = head;
+    while (current->next)
     {
+        node *prev = current;
+        current = next_node(current);
         int status;
-        if (pids[i].pid != 0 && !(waitpid(pids[i].pid, &status, WNOHANG) == 0))
+        if (!(waitpid(getPid(current), &status, WNOHANG) == 0))
         {
-            printf("Exit status [%s] = %d\n", pids[i].command, WEXITSTATUS(status));
-            memset(&pids[i], 0, sizeof(pids[i]));
+            printf("Exit status [%s]: %d\n", getData(current), WEXITSTATUS(status));
+            free(current->data);
+            deleteNode(head, current);
+            current = prev;
         }
     }
 }
 
-void print_active_processes()
+void print_active_processes(node *head)
 {
-    int i;
-    for (i = 0; i < MAX_BACKGROUND_PROCESSES; i++)
+    node *current = head;
+    while (current->next)
     {
-        if (pids[i].pid != 0)
-        {
-            printf("[%d] %s\n", pids[i].pid, pids[i].command);
-        }
+        current = next_node(current);
+        pid_t pid = getPid(current);
+        char *data = getData(current);
+        printf("[%d] %s\n", pid, data);
     }
 }
 
 int main()
 {
-    int pid_index = 0;
+    node *head = init_list();
     while (1)
     {
         char buf[MAX_PATH];
         // print current directory
-        printf("%s: ", getcwd(NULL, 0));
+        char *cwd = getcwd(NULL, 0);
+        printf("%s: ", cwd);
+        free(cwd);
 
         // ctrl + d makes fgets return NULL
         if (fgets(buf, sizeof(buf), stdin) == NULL)
@@ -230,7 +232,7 @@ int main()
         }
         buf[strcspn(buf, "\n")] = 0;
 
-        kill_all_inactive_processes();
+        kill_all_inactive_processes(head);
 
         if (strlen(buf) == 0)
         {
@@ -254,7 +256,7 @@ int main()
 
         else if (strcmp(internal_command, "jobs") == 0)
         {
-            print_active_processes();
+            print_active_processes(head);
             fflush(NULL);
             continue;
         }
@@ -265,19 +267,8 @@ int main()
             continue;
         }
 
-        // Please don't pipe more than 16 commands, okay? Thank you, bye.
-        command_list parsed_array[16] = {0};
-        parse_input(buf, parsed_array);
-
-        int n_pipe = 0;
-
-        for (int i = 0; i < 16; i++)
-        {
-            if (parsed_array[i].argv != NULL)
-            {
-                n_pipe++;
-            }
-        }
+        command_list *parsed_array = malloc(sizeof(command_list) * strlen(buf));
+        int n_pipe = parse_input(buf, parsed_array);
 
         pid_t child_pid = fork();
         if (child_pid == 0)
@@ -288,10 +279,10 @@ int main()
         {
             if (res)
             {
-                process_data data;
-                data.pid = child_pid;
-                strcpy(data.command, buf);
-                pids[pid_index++ % 16] = data;
+                process_data *data = malloc(sizeof(process_data));
+                data->pid = child_pid;
+                strcpy(data->command, buf);
+                addNode(head, data);
             }
             else
             {
@@ -299,17 +290,16 @@ int main()
                 waitpid(child_pid, &status, 0);
                 if (WIFEXITED(status))
                 {
-                    printf("Exit status = %d\n", WEXITSTATUS(status));
+                    printf("Exit status [%s] = %d\n", parsed_array->argv[0], WEXITSTATUS(status));
                 }
+                for (int i = 0; i < n_pipe; i++)
+                {
+                    free(parsed_array[i].argv);
+                }
+                free(parsed_array);
             }
+
+            fflush(NULL);
         }
-        for (int i = 0; i < 16; i++)
-        {
-            if (parsed_array[i].argv != NULL)
-            {
-                free(parsed_array[i].argv);
-            }
-        }
-        fflush(NULL);
     }
 }
