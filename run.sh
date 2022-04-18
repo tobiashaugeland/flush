@@ -6,5 +6,5 @@ if [[ ! $pgrep ]];
 then
     python3 -m pip install pgrep
 fi
-gcc -o flush -I. flush.c
+gcc -o flush -I. flush.c LinkedList.c
 python3 test.py
