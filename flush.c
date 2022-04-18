@@ -92,26 +92,27 @@ int pipe_task(int in, int out, command_list *command_list)
         }
 
         char **argv = NULL;
+        char **input = command_list->argv;
         int index = 0;
 
-        while (*command_list->argv)
+        while (*input)
         {
-            if (strcmp(*command_list->argv, "<") == 0)
+            if (strcmp(*input, "<") == 0)
             {
-                FILE *fp = fopen(*(++command_list->argv), "r");
+                FILE *fp = fopen(*(++input), "r");
                 dup2(fileno(fp), STDIN_FILENO);
             }
-            else if (strcmp(*command_list->argv, ">") == 0)
+            else if (strcmp(*input, ">") == 0)
             {
-                FILE *fp = fopen(*(++command_list->argv), "w");
+                FILE *fp = fopen(*(++input), "w");
                 dup2(fileno(fp), STDOUT_FILENO);
             }
             else
             {
-                argv = realloc(argv, sizeof(**command_list->argv) * (++index));
-                argv[index - 1] = *command_list->argv;
+                argv = realloc(argv, sizeof(*input) * (++index));
+                argv[index - 1] = *input;
             }
-            command_list->argv++;
+            (void)*input++;
         }
         argv = realloc(argv, sizeof(char *) * (index + 1));
         argv[index] = NULL;
